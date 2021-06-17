@@ -1,0 +1,124 @@
+{
+  "functions": [
+    {
+      "instrs": [
+        {
+          "dest": "inc",
+          "op": "const",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "dest": "v",
+          "op": "const",
+          "type": "int",
+          "value": 1000
+        },
+        {
+          "dest": "max",
+          "op": "const",
+          "type": "int",
+          "value": 1000000
+        },
+        {
+          "dest": "count",
+          "op": "const",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "args": [
+            "v"
+          ],
+          "dest": "pi",
+          "op": "alloc",
+          "type": {
+            "ptr": "int"
+          }
+        },
+        {
+          "args": [
+            "v"
+          ],
+          "dest": "pp",
+          "op": "alloc",
+          "type": {
+            "ptr": {
+              "ptr": "int"
+            }
+          }
+        },
+        {
+          "label": "lbl"
+        },
+        {
+          "args": [
+            "count",
+            "inc"
+          ],
+          "dest": "count",
+          "op": "add",
+          "type": "int"
+        },
+        {
+          "args": [
+            "pp",
+            "pi"
+          ],
+          "op": "store"
+        },
+        {
+          "args": [
+            "pp"
+          ],
+          "dest": "pi",
+          "op": "load",
+          "type": {
+            "ptr": "int"
+          }
+        },
+        {
+          "args": [
+            "count",
+            "max"
+          ],
+          "dest": "loop",
+          "op": "ge",
+          "type": "bool"
+        },
+        {
+          "args": [
+            "loop"
+          ],
+          "labels": [
+            "end",
+            "lbl"
+          ],
+          "op": "br"
+        },
+        {
+          "label": "end"
+        },
+        {
+          "args": [
+            "pi"
+          ],
+          "op": "free"
+        },
+        {
+          "args": [
+            "pp"
+          ],
+          "op": "free"
+        },
+        {
+          "args": [
+            "count"
+          ],
+          "op": "print"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}

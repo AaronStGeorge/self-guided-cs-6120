@@ -10,36 +10,56 @@ type Program struct {
 }
 
 type Function struct {
+	Args   []Args        `json:"args,omitempty"`
 	Instrs []Instruction `json:"instrs"`
 	Name   string        `json:"name"`
+	Type   *Type         `json:"type,omitempty"`
+}
+
+type Args struct {
+	Name string `json:"name"`
+	Type *Type  `json:"type"`
 }
 
 type Instruction struct {
+	Args   []string `json:"args,omitempty"`
 	Dest   *string  `json:"dest,omitempty"`
+	Labels []string `json:"labels,omitempty"`
+	Funcs  []string `json:"funcs,omitempty"`
 	Op     *string  `json:"op,omitempty"`
 	Type   *Type    `json:"type,omitempty"`
 	Value  *Value   `json:"value,omitempty"`
-	Labels []string `json:"labels,omitempty"`
 	Label  *string  `json:"label,omitempty"`
-	Args   []string `json:"args,omitempty"`
 }
 
 type Value struct {
-	Int  *int
-	Bool *bool
+	// Bril has and int and a float type but we always store a float64 since
+	// we're always pulling this out of JSON.
+	Float *float64
+	Bool  *bool
 }
 
-func (b *Value) UnmarshalJSON(data []byte) error {
-	var v interface{}
-	if err := json.Unmarshal(data, &v); err != nil {
+func (v *Value) MarshalJSON() ([]byte, error) {
+	switch {
+	case v.Float != nil:
+		return json.Marshal(*v.Float)
+	case v.Bool != nil:
+		return json.Marshal(*v.Bool)
+	default:
+		return nil, errors.New("malformed value")
+	}
+}
+
+func (v *Value) UnmarshalJSON(data []byte) error {
+	var readValue interface{}
+	if err := json.Unmarshal(data, &readValue); err != nil {
 		return err
 	}
-	switch t := v.(type) {
+	switch t := readValue.(type) {
 	case float64:
-		i := int(t)
-		b.Int = &i
+		v.Float = &t
 	case bool:
-		b.Bool = &t
+		v.Bool = &t
 	default:
 		return errors.New("unknown type")
 	}
@@ -49,6 +69,17 @@ func (b *Value) UnmarshalJSON(data []byte) error {
 type Type struct {
 	Primitive     *string
 	Parameterized *ParameterizedType
+}
+
+func (t *Type) MarshalJSON() ([]byte, error) {
+	switch {
+	case t.Primitive != nil:
+		return json.Marshal(*t.Primitive)
+	case t.Parameterized != nil:
+		return json.Marshal(t.Parameterized)
+	default:
+		return nil, errors.New("malformed type")
+	}
 }
 
 func (t *Type) UnmarshalJSON(data []byte) error {
@@ -76,12 +107,11 @@ type ParameterizedType struct {
 	Type      Type
 }
 
+func (pt *ParameterizedType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]*Type{pt.Parameter: &pt.Type})
+}
+
 func (pt *ParameterizedType) UnmarshalJSON(data []byte) error {
-	//// Remove whitespace
-	//buffer := new(bytes.Buffer)
-	//if err := json.Compact(buffer, data); err != nil {
-	//	return err
-	//}
 	// Get the data
 	var v map[string]interface{}
 	if err := json.Unmarshal(data, &v); err != nil {

@@ -1,0 +1,45 @@
+{
+  "functions": [
+    {
+      "instrs": [
+        {
+          "dest": "two",
+          "op": "const",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "args": [
+            "two"
+          ],
+          "dest": "p",
+          "op": "alloc",
+          "type": {
+            "ptr": "int"
+          }
+        },
+        {
+          "args": [
+            "p"
+          ],
+          "dest": "tmp",
+          "op": "load",
+          "type": "int"
+        },
+        {
+          "args": [
+            "tmp"
+          ],
+          "op": "print"
+        },
+        {
+          "args": [
+            "p"
+          ],
+          "op": "free"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}

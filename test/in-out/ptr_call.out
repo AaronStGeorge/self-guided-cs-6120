@@ -1,0 +1,56 @@
+{
+  "functions": [
+    {
+      "args": [
+        {
+          "name": "p",
+          "type": {
+            "ptr": "int"
+          }
+        }
+      ],
+      "instrs": [
+        {
+          "op": "ret"
+        }
+      ],
+      "name": "funcA"
+    },
+    {
+      "instrs": [
+        {
+          "dest": "five",
+          "op": "const",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "args": [
+            "five"
+          ],
+          "dest": "x",
+          "op": "alloc",
+          "type": {
+            "ptr": "int"
+          }
+        },
+        {
+          "args": [
+            "x"
+          ],
+          "funcs": [
+            "funcA"
+          ],
+          "op": "call"
+        },
+        {
+          "args": [
+            "x"
+          ],
+          "op": "free"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}

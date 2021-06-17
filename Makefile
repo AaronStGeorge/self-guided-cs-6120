@@ -1,6 +1,10 @@
-test: build
-	@./scripts/run_on_all_test_bril_json.bash bin/cfg-dot
+TESTS := test/in-out/*.bril
 
+.PHONY: test
+test: build
+	@turnt $(TESTS)
+
+.PHONY: test
 build:
 	@mkdir -p bin
 	@go build -o bin ./...

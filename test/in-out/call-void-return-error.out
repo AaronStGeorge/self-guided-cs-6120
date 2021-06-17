@@ -1,0 +1,32 @@
+{
+  "functions": [
+    {
+      "instrs": [
+        {
+          "funcs": [
+            "print4"
+          ],
+          "op": "call"
+        }
+      ],
+      "name": "main"
+    },
+    {
+      "instrs": [
+        {
+          "dest": "v",
+          "op": "const",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "args": [
+            "v"
+          ],
+          "op": "ret"
+        }
+      ],
+      "name": "print4"
+    }
+  ]
+}

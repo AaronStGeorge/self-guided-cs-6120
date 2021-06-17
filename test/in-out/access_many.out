@@ -1,0 +1,115 @@
+{
+  "functions": [
+    {
+      "instrs": [
+        {
+          "dest": "inc",
+          "op": "const",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "dest": "v",
+          "op": "const",
+          "type": "int",
+          "value": 1000000
+        },
+        {
+          "dest": "max",
+          "op": "const",
+          "type": "int",
+          "value": 1000000
+        },
+        {
+          "args": [
+            "v"
+          ],
+          "dest": "p",
+          "op": "alloc",
+          "type": {
+            "ptr": "int"
+          }
+        },
+        {
+          "dest": "count",
+          "op": "const",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "args": [
+            "p",
+            "count"
+          ],
+          "dest": "p2",
+          "op": "ptradd",
+          "type": {
+            "ptr": "int"
+          }
+        },
+        {
+          "label": "lbl"
+        },
+        {
+          "args": [
+            "count",
+            "inc"
+          ],
+          "dest": "count",
+          "op": "add",
+          "type": "int"
+        },
+        {
+          "args": [
+            "p2",
+            "v"
+          ],
+          "op": "store"
+        },
+        {
+          "args": [
+            "p2"
+          ],
+          "dest": "val",
+          "op": "load",
+          "type": "int"
+        },
+        {
+          "args": [
+            "count",
+            "max"
+          ],
+          "dest": "loop",
+          "op": "ge",
+          "type": "bool"
+        },
+        {
+          "args": [
+            "loop"
+          ],
+          "labels": [
+            "end",
+            "lbl"
+          ],
+          "op": "br"
+        },
+        {
+          "label": "end"
+        },
+        {
+          "args": [
+            "p"
+          ],
+          "op": "free"
+        },
+        {
+          "args": [
+            "count"
+          ],
+          "op": "print"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}

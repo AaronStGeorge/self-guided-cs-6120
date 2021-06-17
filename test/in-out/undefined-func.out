@@ -1,0 +1,15 @@
+{
+  "functions": [
+    {
+      "instrs": [
+        {
+          "funcs": [
+            "notafun"
+          ],
+          "op": "call"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}

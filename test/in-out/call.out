@@ -1,0 +1,65 @@
+{
+  "functions": [
+    {
+      "args": [
+        {
+          "name": "n",
+          "type": "int"
+        }
+      ],
+      "instrs": [
+        {
+          "dest": "five",
+          "op": "const",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "args": [
+            "n",
+            "five"
+          ],
+          "dest": "sum",
+          "op": "add",
+          "type": "int"
+        },
+        {
+          "args": [
+            "sum"
+          ],
+          "op": "ret"
+        }
+      ],
+      "name": "add5",
+      "type": "int"
+    },
+    {
+      "instrs": [
+        {
+          "dest": "a",
+          "op": "const",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "args": [
+            "a"
+          ],
+          "dest": "b",
+          "funcs": [
+            "add5"
+          ],
+          "op": "call",
+          "type": "int"
+        },
+        {
+          "args": [
+            "b"
+          ],
+          "op": "print"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}

@@ -92,7 +92,8 @@ func MakeCFG(namesInOrder []string, nameToBlock map[string][]models.Instruction)
 	return nameToJumpedTo
 }
 
-func ProgramFromStdin() models.Program {
+// ReadProgram reads program from STDIN. All errors are fatal.
+func ReadProgram() models.Program {
 	reader := bufio.NewReader(os.Stdin)
 	var output []rune
 
@@ -110,4 +111,12 @@ func ProgramFromStdin() models.Program {
 	}
 
 	return prog
+}
+
+func PrintProgram(prog models.Program) {
+	out, err := json.Marshal(&prog)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(out))
 }

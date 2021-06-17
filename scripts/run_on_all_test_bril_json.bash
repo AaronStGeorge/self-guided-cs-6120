@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "Note: This only asserts that the program will run with non zero exit code on the
-      particular input gathered from. Not a particularly strong test."
+      inputs naively gathered from bril test directory. Not a particularly strong test."
 echo
 
 BRIL_TEST_DIR=${BRIL_TEST_DIR:-~/Dev/misc/bril/test}

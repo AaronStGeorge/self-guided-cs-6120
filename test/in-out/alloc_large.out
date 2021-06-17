@@ -1,0 +1,89 @@
+{
+  "functions": [
+    {
+      "instrs": [
+        {
+          "dest": "inc",
+          "op": "const",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "dest": "v",
+          "op": "const",
+          "type": "int",
+          "value": 1000
+        },
+        {
+          "dest": "max",
+          "op": "const",
+          "type": "int",
+          "value": 1000000
+        },
+        {
+          "dest": "count",
+          "op": "const",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "label": "lbl"
+        },
+        {
+          "args": [
+            "count",
+            "inc"
+          ],
+          "dest": "count",
+          "op": "add",
+          "type": "int"
+        },
+        {
+          "args": [
+            "v"
+          ],
+          "dest": "p",
+          "op": "alloc",
+          "type": {
+            "ptr": "int"
+          }
+        },
+        {
+          "args": [
+            "p"
+          ],
+          "op": "free"
+        },
+        {
+          "args": [
+            "count",
+            "max"
+          ],
+          "dest": "loop",
+          "op": "ge",
+          "type": "bool"
+        },
+        {
+          "args": [
+            "loop"
+          ],
+          "labels": [
+            "end",
+            "lbl"
+          ],
+          "op": "br"
+        },
+        {
+          "label": "end"
+        },
+        {
+          "args": [
+            "count"
+          ],
+          "op": "print"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}

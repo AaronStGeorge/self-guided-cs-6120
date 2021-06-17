@@ -1,0 +1,49 @@
+{
+  "functions": [
+    {
+      "instrs": [
+        {
+          "funcs": [
+            "f"
+          ],
+          "op": "call"
+        }
+      ],
+      "name": "main"
+    },
+    {
+      "instrs": [
+        {
+          "dest": "v",
+          "op": "const",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "args": [
+            "v"
+          ],
+          "op": "print"
+        }
+      ],
+      "name": "f"
+    },
+    {
+      "instrs": [
+        {
+          "dest": "v",
+          "op": "const",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "args": [
+            "v"
+          ],
+          "op": "print"
+        }
+      ],
+      "name": "f"
+    }
+  ]
+}
