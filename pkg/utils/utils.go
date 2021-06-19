@@ -130,3 +130,11 @@ func PrintProgram(prog models.Program) {
 	}
 	fmt.Println(string(out))
 }
+
+func FlattenBlocks(namesInOrder []string, nameToBlock map[string][]models.Instruction) []models.Instruction {
+	var out []models.Instruction
+	for _, name := range namesInOrder {
+		out = append(out, nameToBlock[name]...)
+	}
+	return out
+}

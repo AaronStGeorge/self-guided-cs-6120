@@ -1,4 +1,5 @@
-TESTS := test/in-out/*.bril
+TESTS := test/in-out/*.bril \
+         test/tdce/*.bril
 
 .PHONY: test
 test: build
@@ -7,4 +8,5 @@ test: build
 .PHONY: test
 build:
 	@mkdir -p bin
+	@rm bin/*
 	@go build -o bin ./...
