@@ -19,7 +19,7 @@ func outputDot(namesInOrder []string, cfg map[string][]string) {
 func main() {
 	prog := utils.ReadProgram()
 
-	namesInOrder, nameToBlock := utils.MakeBlocks(prog.Functions[0].Instrs)
+	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0].Instrs)
 	cfg := utils.MakeCFG(namesInOrder, nameToBlock)
 
 	outputDot(namesInOrder, cfg)

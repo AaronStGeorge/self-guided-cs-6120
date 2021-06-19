@@ -13,24 +13,34 @@ import (
 
 var terminators = [...]string{"jmp", "br", "ret"}
 
-func MakeBlocks(body []models.Instruction) ([]string, map[string][]models.Instruction) {
+// BasicBlocks breaks program down into basic blocks which is just a term for a
+// string of instructions with no control flow, just things that need to happen
+// one after another.
+func BasicBlocks(body []models.Instruction) ([]string, map[string][]models.Instruction) {
 	var namesInOrder []string
 	nameToBlock := make(map[string][]models.Instruction)
+
 	var block []models.Instruction
-	b := 0
-	var name *string
+
+	blockCounter := 0
+	var blockName *string
+
 	addBlock := func() {
 		if len(block) != 0 {
-			// If there was no name from a label for the block give it one
-			if name == nil {
-				tmp := fmt.Sprintf("b%d", b)
-				name = &tmp
-				b++
+			// If there was no blockName from a label for the block give it one
+			if blockName == nil {
+				tmp := fmt.Sprintf("blockCounter%d", blockCounter)
+				blockName = &tmp
+				blockCounter++
 			}
-			nameToBlock[*name] = block
-			namesInOrder = append(namesInOrder, *name)
+
+			// Add to output
+			nameToBlock[*blockName] = block
+			namesInOrder = append(namesInOrder, *blockName)
+
+			// Reset state
 			block = []models.Instruction{}
-			name = nil
+			blockName = nil
 		}
 	}
 
@@ -43,7 +53,7 @@ func MakeBlocks(body []models.Instruction) ([]string, map[string][]models.Instru
 		} else { // we have a label
 			addBlock()
 			// The next block will start with label we just found
-			name = instruction.Label
+			blockName = instruction.Label
 			block = append(block, instruction)
 		}
 	}
