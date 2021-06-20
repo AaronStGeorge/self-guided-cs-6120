@@ -3,7 +3,6 @@
 package main
 
 import (
-	"log"
 	"strconv"
 
 	"oooga.ooo/cs-1620/pkg/models"
@@ -50,7 +49,7 @@ func equalComputedValue(a, b models.Instruction) bool {
 	return true
 }
 
-func equivilantComputationIndex(instruction models.Instruction, table []lvnTableEntry) (int, bool) {
+func equivilantComputationIndex(table []lvnTableEntry, instruction models.Instruction) (int, bool) {
 	for i, entry := range table {
 		if equalComputedValue(instruction, entry.inst) {
 			return i, true
@@ -72,39 +71,42 @@ func lvn(block []models.Instruction) {
 	var table []lvnTableEntry
 	varToIdx := make(map[string]int)
 
-	for i, inst := range block {
+	for blockIdx, inst := range block {
 		if inst.Dest != nil {
+			var argTableIdxs []int
 			var mangledArgs []string
 			for _, arg := range inst.Args {
+				argTableIdxs = append(argTableIdxs, varToIdx[arg])
 				mangledArgs = append(mangledArgs, strconv.Itoa(varToIdx[arg]))
 			}
-			// TODO: explain the flagrant abuse of the Instruction type here
-			inst.Args = mangledArgs
-			if idx, ok := equivilantComputationIndex(inst, table); ok {
-				block[i] = models.Instruction{
-					Args: []string{table[idx].cv},
+			// We are reusing models.Instruction for our table value
+			// even though it could probably be better expressed in
+			// it's own type. Hence the mangled args.
+			tableInst := inst
+			tableInst.Args = mangledArgs
+			if tableIdx, ok := equivilantComputationIndex(table, tableInst); ok {
+				inst = models.Instruction{
+					Args: []string{table[tableIdx].cv},
 					Dest: inst.Dest,
 					Op:   &id,
 					Type: inst.Type,
 				}
-				varToIdx[*inst.Dest] = idx
+				varToIdx[*inst.Dest] = tableIdx
 			} else {
 				tableEntry := lvnTableEntry{
-					inst: inst,
+					inst: tableInst,
 					cv:   *inst.Dest,
 				}
 				table = append(table, tableEntry)
 				varToIdx[*inst.Dest] = len(table) - 1
 
-				// Rewrite args for this function to point at canonical variables
-				for j, arg := range mangledArgs {
-					idx, err := strconv.Atoi(arg)
-					if err != nil {
-						log.Fatalln(err)
-					}
-					block[i].Args[j] = table[idx].cv
+				// Rewrite args for this function to point at
+				// canonical variables
+				for argIdx, tableIdx := range argTableIdxs {
+					inst.Args[argIdx] = table[tableIdx].cv
 				}
 			}
+			block[blockIdx] = inst
 		}
 	}
 }
