@@ -3,6 +3,9 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"sort"
 	"strconv"
 
 	"oooga.ooo/cs-1620/pkg/models"
@@ -49,76 +52,135 @@ func equalComputedValue(a, b models.Instruction) bool {
 	return true
 }
 
-func equivilantComputationIndex(table []lvnTableEntry, instruction models.Instruction) (int, bool) {
+func equivalentComputationIndex(table []lvnTableEntry, instruction models.Instruction) (int, bool) {
 	for i, entry := range table {
-		if equalComputedValue(instruction, entry.inst) {
-			return i, true
+		if entry.inst != nil {
+			if equalComputedValue(instruction, *entry.inst) {
+				return i, true
+			}
 		}
 	}
 	return -1, false
 }
 
 type lvnTableEntry struct {
-	inst models.Instruction
+	inst *models.Instruction
 	cv   string // canonical value
 }
 
 var id = "id"
 
 // lvn modifies instructions in place
-func lvn(block []models.Instruction) {
-
+func lvn(block []models.Instruction, prop bool) {
+	// This stores a mapping between a computation that has taken place and
+	// a variable with which it can be referred. Unlike the environment this
+	// is a static map it doesn't update, new things are simply added. So a
+	// variable in the table must always be able to refer to the computation
+	// regardless of what the environment currently contains.
 	var table []lvnTableEntry
-	varToIdx := make(map[string]int)
+	// This is our environment. It stores mappings between live variables
+	// currently in our program and computations that have taken place. As
+	// our program overwrites things variables in our environment will
+	// change, while the computations don't.
+	varToTableIdx := make(map[string]int)
 
 	for blockIdx, inst := range block {
 		if inst.Dest != nil {
 			var argTableIdxs []int
 			var mangledArgs []string
 			for _, arg := range inst.Args {
-				argTableIdxs = append(argTableIdxs, varToIdx[arg])
-				mangledArgs = append(mangledArgs, strconv.Itoa(varToIdx[arg]))
+				// If we don't have this in our environment it
+				// came from a global context. Simple thing to
+				// do here is just drop it in the environment
+				// and table with no computation. It has a
+				// computation we just don't know what it is.
+				if _, ok := varToTableIdx[arg]; !ok {
+					tableEntry := lvnTableEntry{
+						cv: arg,
+					}
+					table = append(table, tableEntry)
+					varToTableIdx[arg] = len(table) - 1
+				}
+				argTableIdxs = append(argTableIdxs, varToTableIdx[arg])
+				mangledArgs = append(mangledArgs, strconv.Itoa(varToTableIdx[arg]))
+				// For commutative operations consider sorted to
+				// be canonical
+				if *inst.Op == "add" || *inst.Op == "mul" {
+					sort.Strings(mangledArgs)
+				}
 			}
 			// We are reusing models.Instruction for our table value
 			// even though it could probably be better expressed in
 			// it's own type. Hence the mangled args.
 			tableInst := inst
 			tableInst.Args = mangledArgs
-			if tableIdx, ok := equivilantComputationIndex(table, tableInst); ok {
+			if tableIdx, ok := equivalentComputationIndex(table, tableInst); ok {
 				inst = models.Instruction{
 					Args: []string{table[tableIdx].cv},
 					Dest: inst.Dest,
 					Op:   &id,
 					Type: inst.Type,
 				}
-				varToIdx[*inst.Dest] = tableIdx
+				varToTableIdx[*inst.Dest] = tableIdx
 			} else {
+				// Store original variable in environment so
+				// proceeding uses can still look up variable by
+				// original name not made up unique name (if we
+				// end up making on). Use len(table) because the
+				// entry is about to be added.
+				varToTableIdx[*inst.Dest] = len(table)
+
+				// Determine if variable is reused after this
+				// point, if so give it unique name. This is
+				// because the *value* may be re-used after the
+				// variable is clobbered in the environment. In
+				// that circumstance, we need a name to get at
+				// this previously computed value. In the
+				// environment the original name will point at
+				// this entry in the table up until it gets
+				// clobbered. Our pass will therefore re-write
+				// all uses to our unique name in the final
+				// output.
+				for _, afterInst := range block[blockIdx+1:] {
+					if afterInst.Dest != nil && *afterInst.Dest == *inst.Dest {
+						uniqueDest := fmt.Sprintf("lvn.%d", blockIdx)
+						inst.Dest = &uniqueDest
+						break
+					}
+				}
 				tableEntry := lvnTableEntry{
-					inst: tableInst,
-					cv:   *inst.Dest,
+					inst: &tableInst,
+					cv:   *inst.Dest, // we want to use the new name here
 				}
 				table = append(table, tableEntry)
-				varToIdx[*inst.Dest] = len(table) - 1
 
-				// Rewrite args for this function to point at
+				// Rewrite args for this function to use the
 				// canonical variables
 				for argIdx, tableIdx := range argTableIdxs {
 					inst.Args[argIdx] = table[tableIdx].cv
 				}
 			}
-			block[blockIdx] = inst
+		} else {
+			for argIdx, arg := range inst.Args {
+				inst.Args[argIdx] = table[varToTableIdx[arg]].cv
+			}
 		}
+		block[blockIdx] = inst
 	}
 }
 
 func main() {
 	prog := utils.ReadProgram()
 
+	prop := flag.Bool("p", false, "")
+	flag.Parse()
+	println(*prop)
+
 	for i, function := range prog.Functions {
 		namesInOrder, nameToBlock := utils.BasicBlocks(function.Instrs)
 		for _, blockName := range namesInOrder {
-			// This will modify
-			lvn(nameToBlock[blockName])
+			// This will modify the block in place
+			lvn(nameToBlock[blockName], *prop)
 		}
 
 		prog.Functions[i].Instrs = utils.FlattenBlocks(namesInOrder, nameToBlock)
