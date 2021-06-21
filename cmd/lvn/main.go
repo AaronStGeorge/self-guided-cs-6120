@@ -52,7 +52,17 @@ func equalComputedValue(a, b models.Instruction) bool {
 	return true
 }
 
-func equivalentComputationIndex(table []lvnTableEntry, instruction models.Instruction) (int, bool) {
+func equivalentComputationIndex(table []lvnTableEntry, instruction models.Instruction, env map[string]int, prop bool) (int, bool) {
+	if prop && *instruction.Op == "id" {
+		i, err := strconv.Atoi(instruction.Args[0])
+		if err != nil {
+			panic(err)
+		}
+		entry := table[i]
+		if entry.inst != nil {
+			return i, true
+		}
+	}
 	for i, entry := range table {
 		if entry.inst != nil {
 			if equalComputedValue(instruction, *entry.inst) {
@@ -114,12 +124,32 @@ func lvn(block []models.Instruction, prop bool) {
 			// it's own type. Hence the mangled args.
 			tableInst := inst
 			tableInst.Args = mangledArgs
-			if tableIdx, ok := equivalentComputationIndex(table, tableInst); ok {
-				inst = models.Instruction{
-					Args: []string{table[tableIdx].cv},
-					Dest: inst.Dest,
-					Op:   &id,
-					Type: inst.Type,
+			if tableIdx, ok := equivalentComputationIndex(table, tableInst, varToTableIdx, prop); ok {
+				foundInst := table[tableIdx]
+				// equivalentComputationIndex will never return
+				// table entry without operation blind
+				// dereference is safe here
+				op := *foundInst.inst.Op
+				if prop && op == "id" || op == "const" {
+					temp := *foundInst.inst
+					temp.Dest = inst.Dest
+					inst = temp
+					var outArgs []string
+					for _, arg := range inst.Args {
+						ii, err := strconv.Atoi(arg)
+						if err != nil {
+							panic(err)
+						}
+						outArgs = append(outArgs, table[ii].cv)
+					}
+					inst.Args = outArgs
+				} else {
+					inst = models.Instruction{
+						Args: []string{foundInst.cv},
+						Dest: inst.Dest,
+						Op:   &id,
+						Type: inst.Type,
+					}
 				}
 				varToTableIdx[*inst.Dest] = tableIdx
 			} else {
@@ -162,7 +192,15 @@ func lvn(block []models.Instruction, prop bool) {
 			}
 		} else {
 			for argIdx, arg := range inst.Args {
-				inst.Args[argIdx] = table[varToTableIdx[arg]].cv
+				tableEntry := table[varToTableIdx[arg]]
+				if prop && *tableEntry.inst.Op == "id" {
+					ii, err := strconv.Atoi(tableEntry.inst.Args[0])
+					if err != nil {
+						panic(err)
+					}
+					tableEntry = table[ii]
+				}
+				inst.Args[argIdx] = tableEntry.cv
 			}
 		}
 		block[blockIdx] = inst
