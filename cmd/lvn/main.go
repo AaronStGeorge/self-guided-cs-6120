@@ -1,4 +1,5 @@
 // Local Value Numbering
+// The code could use some work here, but I need to move on.
 
 package main
 
@@ -52,13 +53,20 @@ func equalComputedValue(a, b models.Instruction) bool {
 	return true
 }
 
-func equivalentComputationIndex(table []lvnTableEntry, instruction models.Instruction, env map[string]int, prop bool) (int, bool) {
+func equivalentComputationIndex(table []lvnTableEntry, instruction models.Instruction, prop bool) (int, bool) {
+	// If we are doing propagation "see through" the id instruction and just
+	// return the computation it points at. One case that makes this
+	// difficult: if the computation the variable points at happened outside
+	// this block then we don't want to see through this id instruction
+	// since it is a local optimization.
 	if prop && *instruction.Op == "id" {
 		i, err := strconv.Atoi(instruction.Args[0])
 		if err != nil {
 			panic(err)
 		}
 		entry := table[i]
+		// This will be nill only if the variable refers to something
+		// that was computed outside of this block.
 		if entry.inst != nil {
 			return i, true
 		}
@@ -124,13 +132,12 @@ func lvn(block []models.Instruction, prop bool) {
 			// it's own type. Hence the mangled args.
 			tableInst := inst
 			tableInst.Args = mangledArgs
-			if tableIdx, ok := equivalentComputationIndex(table, tableInst, varToTableIdx, prop); ok {
+			if tableIdx, ok := equivalentComputationIndex(table, tableInst, prop); ok {
 				foundInst := table[tableIdx]
 				// equivalentComputationIndex will never return
 				// table entry without operation blind
 				// dereference is safe here
-				op := *foundInst.inst.Op
-				if prop && op == "id" || op == "const" {
+				if prop {
 					temp := *foundInst.inst
 					temp.Dest = inst.Dest
 					inst = temp
@@ -178,14 +185,28 @@ func lvn(block []models.Instruction, prop bool) {
 						break
 					}
 				}
-				tableEntry := lvnTableEntry{
-					inst: &tableInst,
-					cv:   *inst.Dest, // we want to use the new name here
+
+				tableEntry := lvnTableEntry{}
+				if prop && *inst.Op == "id" {
+					// If prop is on and we are storing an
+					// id instruction than this came from
+					tableEntry = lvnTableEntry{
+						inst: &tableInst,
+						cv:   inst.Args[0],
+					}
+				} else {
+					tableEntry = lvnTableEntry{
+						inst: &tableInst,
+						cv:   *inst.Dest, // we want to use the new name here
+					}
 				}
 				table = append(table, tableEntry)
 
 				// Rewrite args for this function to use the
-				// canonical variables
+				// canonical variables. We want to use
+				// argTableIdxs rather than looking things up in
+				// the environment because we want the things
+				// from *before* we modified the environmet.
 				for argIdx, tableIdx := range argTableIdxs {
 					inst.Args[argIdx] = table[tableIdx].cv
 				}
@@ -193,13 +214,6 @@ func lvn(block []models.Instruction, prop bool) {
 		} else {
 			for argIdx, arg := range inst.Args {
 				tableEntry := table[varToTableIdx[arg]]
-				if prop && *tableEntry.inst.Op == "id" {
-					ii, err := strconv.Atoi(tableEntry.inst.Args[0])
-					if err != nil {
-						panic(err)
-					}
-					tableEntry = table[ii]
-				}
 				inst.Args[argIdx] = tableEntry.cv
 			}
 		}
