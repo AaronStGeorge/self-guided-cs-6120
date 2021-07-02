@@ -38,7 +38,7 @@ func main() {
 	}
 
 	// Write new test file for every command we are interested in
-	cmds := []string{"defined"}
+	cmds := []string{"defined", "live", "cprop"}
 	for _, cmd := range cmds {
 		for _, p := range paths {
 			contents, err := ioutil.ReadFile(p)
