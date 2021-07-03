@@ -16,20 +16,19 @@ var terminators = [...]string{"jmp", "br", "ret"}
 // BasicBlocks breaks program down into basic blocks which is just a term for a
 // string of instructions with no control flow, just things that need to happen
 // one after another.
-func BasicBlocks(body []models.Instruction) ([]string, map[string][]models.Instruction) {
-	var namesInOrder []string
-	nameToBlock := make(map[string][]models.Instruction)
+func BasicBlocks(body []models.Instruction) (namesInOrder []string, nameToBlock map[string][]models.Instruction) {
+	nameToBlock = make(map[string][]models.Instruction)
 
 	var block []models.Instruction
 
-	blockCounter := 0
+	blockCounter := 1
 	var blockName *string
 
 	addBlock := func() {
 		if len(block) != 0 {
 			// If there was no blockName from a label for the block give it one
 			if blockName == nil {
-				tmp := fmt.Sprintf("blockCounter%d", blockCounter)
+				tmp := fmt.Sprintf("b%d", blockCounter)
 				blockName = &tmp
 				blockCounter++
 			}
@@ -62,17 +61,19 @@ func BasicBlocks(body []models.Instruction) ([]string, map[string][]models.Instr
 	return namesInOrder, nameToBlock
 }
 
-func contains(instructions []string, instruction string) bool {
-	for _, a := range instructions {
-		if a == instruction {
+func contains(strs []string, str string) bool {
+	for _, a := range strs {
+		if a == str {
 			return true
 		}
 	}
 	return false
 }
 
+type Digraph map[string][]string
+
 // MakeCFG computes the control flow graph
-func MakeCFG(namesInOrder []string, nameToBlock map[string][]models.Instruction) map[string][]string {
+func MakeCFG(namesInOrder []string, nameToBlock map[string][]models.Instruction) Digraph {
 	nameToJumpedTo := make(map[string][]string)
 	for i, name := range namesInOrder {
 		block := nameToBlock[name]
@@ -100,6 +101,20 @@ func MakeCFG(namesInOrder []string, nameToBlock map[string][]models.Instruction)
 		}
 	}
 	return nameToJumpedTo
+}
+
+func Predecessors(cfg Digraph, name string) []string {
+	var predecessors []string
+	for n, to := range cfg {
+		if contains(to, name) {
+			predecessors = append(predecessors, n)
+		}
+	}
+	return predecessors
+}
+
+func Successors(cfg Digraph, name string) []string {
+	return cfg[name]
 }
 
 // ReadProgram reads program from STDIN. All errors are fatal.
