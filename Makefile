@@ -1,6 +1,7 @@
 TESTS := test/in-out/*.bril \
          test/tdce/*.bril \
-         test/lvn/*.bril
+         test/lvn/*.bril \
+         test/df/*.bril
 
 .PHONY: test
 test: build
