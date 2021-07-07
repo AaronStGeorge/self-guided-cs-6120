@@ -7,6 +7,8 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
+	"strings"
 
 	"oooga.ooo/cs-1620/pkg/models"
 )
@@ -150,6 +152,55 @@ func FlattenBlocks(namesInOrder []string, nameToBlock map[string][]models.Instru
 	var out []models.Instruction
 	for _, name := range namesInOrder {
 		out = append(out, nameToBlock[name]...)
+	}
+	return out
+}
+
+type Set map[string]struct{}
+
+func (s Set) String() string {
+	if len(s) == 0 {
+		return "∅"
+	}
+	var items []string
+	for k := range s {
+		items = append(items, k)
+	}
+	sort.Strings(items)
+	return strings.Join(items, ", ")
+}
+
+func (s Set) Add(item string) {
+	s[item] = struct{}{}
+}
+
+func (s Set) Contains(item string) bool {
+	_, ok := s[item]
+	return ok
+}
+
+func (s Set) Remove(item string) {
+	delete(s, item)
+}
+
+func Sub(rhs, lhs Set) Set {
+	out := make(Set)
+	for item := range rhs {
+		out.Add(item)
+	}
+	for item := range lhs {
+		out.Remove(item)
+	}
+	return out
+}
+
+func Union(rhs, lhs Set) Set {
+	out := make(Set)
+	for item := range rhs {
+		out.Add(item)
+	}
+	for item := range lhs {
+		out.Add(item)
 	}
 	return out
 }
