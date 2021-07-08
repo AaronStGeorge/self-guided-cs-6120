@@ -22,3 +22,13 @@ type UnionMeetSetLattice struct {
 func (s UnionMeetSetLattice) Meet(l Lattice) Lattice {
 	return UnionMeetSetLattice{utils.Union(s.Set, l.(UnionMeetSetLattice).Set)}
 }
+
+var _ Lattice = IntersetMeetSetLattice{}
+
+type IntersetMeetSetLattice struct {
+	utils.Set
+}
+
+func (s IntersetMeetSetLattice) Meet(l Lattice) Lattice {
+	return IntersetMeetSetLattice{utils.Intersect(s.Set, l.(IntersetMeetSetLattice).Set)}
+}

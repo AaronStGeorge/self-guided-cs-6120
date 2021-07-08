@@ -21,7 +21,7 @@ type ProgramPoint struct {
 
 func DF(nameToProgramPoint map[string]*ProgramPoint,
 	cfg utils.Digraph,
-	transfer func(instructions []models.Instruction, in lattice.Lattice) lattice.Lattice,
+	transfer func(name string, instructions []models.Instruction, in lattice.Lattice) lattice.Lattice,
 	initialWorkList []string,
 	direction Direction) {
 
@@ -38,11 +38,11 @@ func DF(nameToProgramPoint map[string]*ProgramPoint,
 				}
 
 				before := pp.Out.String()
-				pp.Out = transfer(pp.Instructions, pp.In)
+				pp.Out = transfer(name, pp.Instructions, pp.In)
 				after := pp.Out.String()
 
 				if before != after {
-					nextWorkList = append(workList, utils.Successors(cfg, name)...)
+					nextWorkList = append(nextWorkList, utils.Successors(cfg, name)...)
 				}
 			case Reverse:
 				for _, pred := range utils.Successors(cfg, name) {
@@ -50,11 +50,11 @@ func DF(nameToProgramPoint map[string]*ProgramPoint,
 				}
 
 				before := pp.In.String()
-				pp.In = transfer(pp.Instructions, pp.Out)
+				pp.In = transfer(name, pp.Instructions, pp.Out)
 				after := pp.In.String()
 
 				if before != after {
-					nextWorkList = append(workList, utils.Predecessors(cfg, name)...)
+					nextWorkList = append(nextWorkList, utils.Predecessors(cfg, name)...)
 				}
 			}
 		}

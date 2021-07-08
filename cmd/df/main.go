@@ -8,11 +8,12 @@ import (
 
 	"oooga.ooo/cs-1620/pkg/lattice"
 
+	dfutils "oooga.ooo/cs-1620/pkg/df/utils"
 	"oooga.ooo/cs-1620/pkg/models"
 	"oooga.ooo/cs-1620/pkg/utils"
 )
 
-func defed(instructions []models.Instruction, in lattice.Lattice) lattice.Lattice {
+func defed(_ string, instructions []models.Instruction, in lattice.Lattice) lattice.Lattice {
 	out := make(utils.Set)
 	for _, inst := range instructions {
 		if inst.Dest != nil {
@@ -22,7 +23,7 @@ func defed(instructions []models.Instruction, in lattice.Lattice) lattice.Lattic
 	return lattice.UnionMeetSetLattice{utils.Union(in.(lattice.UnionMeetSetLattice).Set, out)}
 }
 
-func used(instructions []models.Instruction, in lattice.Lattice) lattice.Lattice {
+func used(_ string, instructions []models.Instruction, in lattice.Lattice) lattice.Lattice {
 	used := make(utils.Set)
 	defined := make(utils.Set)
 	for _, inst := range instructions {
@@ -40,17 +41,12 @@ func used(instructions []models.Instruction, in lattice.Lattice) lattice.Lattice
 
 func defined(prog models.Program) (namesInOrder []string, nameToProgramPoint map[string]*df.ProgramPoint) {
 	// the [0] is definitely not a reasonable thing to do in a production circumstance
-	namesInOrder, nameToInstrs := utils.BasicBlocks(prog.Functions[0].Instrs)
-	cfg := utils.MakeCFG(namesInOrder, nameToInstrs)
+	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0].Instrs)
+	cfg := utils.MakeCFG(namesInOrder, nameToBlock)
 
-	nameToProgramPoint = make(map[string]*df.ProgramPoint)
-	for _, name := range namesInOrder {
-		nameToProgramPoint[name] = &df.ProgramPoint{
-			Instructions: nameToInstrs[name],
-			In:           lattice.UnionMeetSetLattice{Set: make(utils.Set)},
-			Out:          lattice.UnionMeetSetLattice{Set: make(utils.Set)},
-		}
-	}
+	nameToProgramPoint = dfutils.MakeNameToProgramPoint(namesInOrder, nameToBlock, func() lattice.Lattice {
+		return lattice.UnionMeetSetLattice{Set: make(utils.Set)}
+	})
 
 	workList := []string{namesInOrder[0]}
 	df.DF(nameToProgramPoint, cfg, defed, workList, df.Forward)
@@ -60,17 +56,12 @@ func defined(prog models.Program) (namesInOrder []string, nameToProgramPoint map
 
 func live(prog models.Program) (namesInOrder []string, nameToProgramPoint map[string]*df.ProgramPoint) {
 	// the [0] is definitely not a reasonable thing to do in a production circumstance
-	namesInOrder, nameToInstrs := utils.BasicBlocks(prog.Functions[0].Instrs)
-	cfg := utils.MakeCFG(namesInOrder, nameToInstrs)
+	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0].Instrs)
+	cfg := utils.MakeCFG(namesInOrder, nameToBlock)
 
-	nameToProgramPoint = make(map[string]*df.ProgramPoint)
-	for _, name := range namesInOrder {
-		nameToProgramPoint[name] = &df.ProgramPoint{
-			Instructions: nameToInstrs[name],
-			In:           lattice.UnionMeetSetLattice{Set: make(utils.Set)},
-			Out:          lattice.UnionMeetSetLattice{Set: make(utils.Set)},
-		}
-	}
+	nameToProgramPoint = dfutils.MakeNameToProgramPoint(namesInOrder, nameToBlock, func() lattice.Lattice {
+		return lattice.UnionMeetSetLattice{Set: make(utils.Set)}
+	})
 
 	workList := []string{namesInOrder[len(namesInOrder)-1]}
 	df.DF(nameToProgramPoint, cfg, used, workList, df.Reverse)

@@ -170,8 +170,10 @@ func (s Set) String() string {
 	return strings.Join(items, ", ")
 }
 
-func (s Set) Add(item string) {
-	s[item] = struct{}{}
+func (s Set) Add(items ...string) {
+	for _, item := range items {
+		s[item] = struct{}{}
+	}
 }
 
 func (s Set) Contains(item string) bool {
@@ -201,6 +203,16 @@ func Union(rhs, lhs Set) Set {
 	}
 	for item := range lhs {
 		out.Add(item)
+	}
+	return out
+}
+
+func Intersect(rhs, lhs Set) Set {
+	out := make(Set)
+	for item := range rhs {
+		if lhs.Contains(item) {
+			out.Add(item)
+		}
 	}
 	return out
 }
