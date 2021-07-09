@@ -44,7 +44,7 @@ func defined(prog models.Program) (namesInOrder []string, nameToProgramPoint map
 	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0])
 	cfg := utils.MakeCFG(namesInOrder, nameToBlock)
 
-	nameToProgramPoint = dfutils.MakeNameToProgramPoint(namesInOrder, nameToBlock, func() lattice.Lattice {
+	nameToProgramPoint = dfutils.MakeNameToProgramPoint(nameToBlock, func() lattice.Lattice {
 		return lattice.UnionMeetSetLattice{Set: make(utils.Set)}
 	})
 
@@ -59,7 +59,7 @@ func live(prog models.Program) (namesInOrder []string, nameToProgramPoint map[st
 	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0])
 	cfg := utils.MakeCFG(namesInOrder, nameToBlock)
 
-	nameToProgramPoint = dfutils.MakeNameToProgramPoint(namesInOrder, nameToBlock, func() lattice.Lattice {
+	nameToProgramPoint = dfutils.MakeNameToProgramPoint(nameToBlock, func() lattice.Lattice {
 		return lattice.UnionMeetSetLattice{Set: make(utils.Set)}
 	})
 

@@ -6,12 +6,12 @@ import (
 	"oooga.ooo/cs-1620/pkg/models"
 )
 
-func MakeNameToProgramPoint(namesInOrder []string, nameToBlock map[string][]models.Instruction, top func() lattice.Lattice) map[string]*df.ProgramPoint {
+func MakeNameToProgramPoint(nameToBlock map[string][]models.Instruction, top func() lattice.Lattice) map[string]*df.ProgramPoint {
 	nameToProgramPoint := make(map[string]*df.ProgramPoint)
 
-	for _, name := range namesInOrder {
+	for name, block := range nameToBlock {
 		nameToProgramPoint[name] = &df.ProgramPoint{
-			Instructions: nameToBlock[name],
+			Instructions: block,
 			In:           top(),
 			Out:          top(),
 		}

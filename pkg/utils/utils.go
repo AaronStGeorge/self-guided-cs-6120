@@ -239,3 +239,14 @@ func Intersect(rhs, lhs Set) Set {
 	}
 	return out
 }
+
+func OutputDot(namesInOrder []string, cfg Digraph) {
+	fmt.Println("digraph G {")
+	for _, name := range namesInOrder {
+		sort.Strings(cfg[name])
+		for _, jumped := range cfg[name] {
+			fmt.Printf("  \"%s\" -> \"%s\";\n", name, jumped)
+		}
+	}
+	fmt.Println("}")
+}

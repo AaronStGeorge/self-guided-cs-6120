@@ -1,0 +1,5 @@
+digraph G {
+  "entry1" -> "while.cond";
+  "while.cond" -> "while.body";
+  "while.cond" -> "while.finish";
+}

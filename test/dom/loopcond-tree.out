@@ -1,0 +1,7 @@
+digraph G {
+  "entry" -> "loop";
+  "loop" -> "body";
+  "loop" -> "exit";
+  "body" -> "endif";
+  "body" -> "then";
+}
