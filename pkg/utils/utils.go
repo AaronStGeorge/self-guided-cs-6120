@@ -18,7 +18,7 @@ var terminators = [...]string{"jmp", "br", "ret"}
 // BasicBlocks breaks program down into basic blocks which is just a term for a
 // string of instructions with no control flow, just things that need to happen
 // one after another.
-func BasicBlocks(body []models.Instruction) (namesInOrder []string, nameToBlock map[string][]models.Instruction) {
+func BasicBlocks(function models.Function) (namesInOrder []string, nameToBlock map[string][]models.Instruction) {
 	nameToBlock = make(map[string][]models.Instruction)
 
 	var block []models.Instruction
@@ -43,7 +43,7 @@ func BasicBlocks(body []models.Instruction) (namesInOrder []string, nameToBlock 
 		blockName = nil
 	}
 
-	for _, instruction := range body {
+	for _, instruction := range function.Instrs {
 		if instruction.Op != nil {
 			block = append(block, instruction)
 			if contains(terminators[:], *instruction.Op) {
@@ -51,16 +51,19 @@ func BasicBlocks(body []models.Instruction) (namesInOrder []string, nameToBlock 
 			}
 		} else { // we have a label
 
-			// If the first thing in the program is a label create a
-			// block. Jumping to the label is not the same as
-			// jumping to the entry point of the function this block
-			// serves to disambiguate those... Maybe, this doesn't
-			// really make intuitive sense to me, it's just what I
-			// found in the existing tests. That explanation sort of
-			// makes sense though.
 			if len(block) != 0 {
 				addBlock()
-			} else if len(namesInOrder) == 0 {
+			} else if len(namesInOrder) == 0 && len(function.Args) != 0 {
+				// If the first thing in the function is a label
+				// and the function has an argument create a
+				// block. Jumping to the label is not the same
+				// as jumping to the entry point of the function
+				// given that the has an argument that comes
+				// into existence in that block... Maybe, this
+				// doesn't really make intuitive sense to me,
+				// it's just a case that came up in the existing
+				// tests. That explanation sort of makes sense
+				// though.
 				temp := "entry1"
 				blockName = &temp
 				addBlock()

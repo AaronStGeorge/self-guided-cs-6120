@@ -1,7 +1,8 @@
 TESTS := test/in-out/*.bril \
          test/tdce/*.bril \
          test/lvn/*.bril \
-         test/df/*.bril
+         test/df/*.bril \
+         test/dom/*-dom.bril
 
 .PHONY: test
 test: build
@@ -10,5 +11,5 @@ test: build
 .PHONY: test
 build:
 	@mkdir -p bin
-	@rm bin/*
+	@rm -f bin/*;
 	@go build -o bin ./...

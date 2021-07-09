@@ -41,7 +41,7 @@ func used(_ string, instructions []models.Instruction, in lattice.Lattice) latti
 
 func defined(prog models.Program) (namesInOrder []string, nameToProgramPoint map[string]*df.ProgramPoint) {
 	// the [0] is definitely not a reasonable thing to do in a production circumstance
-	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0].Instrs)
+	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0])
 	cfg := utils.MakeCFG(namesInOrder, nameToBlock)
 
 	nameToProgramPoint = dfutils.MakeNameToProgramPoint(namesInOrder, nameToBlock, func() lattice.Lattice {
@@ -56,7 +56,7 @@ func defined(prog models.Program) (namesInOrder []string, nameToProgramPoint map
 
 func live(prog models.Program) (namesInOrder []string, nameToProgramPoint map[string]*df.ProgramPoint) {
 	// the [0] is definitely not a reasonable thing to do in a production circumstance
-	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0].Instrs)
+	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0])
 	cfg := utils.MakeCFG(namesInOrder, nameToBlock)
 
 	nameToProgramPoint = dfutils.MakeNameToProgramPoint(namesInOrder, nameToBlock, func() lattice.Lattice {

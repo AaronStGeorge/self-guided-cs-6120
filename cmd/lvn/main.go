@@ -229,7 +229,7 @@ func main() {
 	println(*prop)
 
 	for i, function := range prog.Functions {
-		namesInOrder, nameToBlock := utils.BasicBlocks(function.Instrs)
+		namesInOrder, nameToBlock := utils.BasicBlocks(function)
 		for _, blockName := range namesInOrder {
 			// This will modify the block in place
 			lvn(nameToBlock[blockName], *prop)
