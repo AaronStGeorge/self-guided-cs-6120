@@ -40,15 +40,28 @@ func dominators(namesInOrder []string, nameToBlock map[string][]models.Instructi
 	return nameToDominators
 }
 
-func walkUpR(cfg utils.Digraph, start string, walk func(name string) bool) bool {
-	preds := utils.Predecessors(cfg, start)
-	for _, name := range preds {
+type Direction int
+
+const (
+	Up Direction = iota
+	Down
+)
+
+func BFS(cfg utils.Digraph, start string, dir Direction, walk func(name string) bool) bool {
+	var nodes []string
+	switch dir {
+	case Up:
+		nodes = utils.Predecessors(cfg, start)
+	case Down:
+		nodes = utils.Successors(cfg, start)
+	}
+	for _, name := range nodes {
 		if walk(name) {
 			return true
 		}
 	}
-	for _, name := range preds {
-		if walkUpR(cfg, name, walk) {
+	for _, name := range nodes {
+		if BFS(cfg, name, dir, walk) {
 			return true
 		}
 	}
@@ -56,7 +69,7 @@ func walkUpR(cfg utils.Digraph, start string, walk func(name string) bool) bool 
 }
 
 func walkUp(cfg utils.Digraph, start string, walk func(name string) bool) {
-	walkUpR(cfg, start, walk)
+	BFS(cfg, start, Up, walk)
 }
 
 // immediateDom - immediate dominator
@@ -91,7 +104,6 @@ func isIDom(dom, sub string, cfg utils.Digraph, nameToDominators map[string]util
 func tree(cfg utils.Digraph, nameToDominators map[string]utils.Set) utils.Digraph {
 	out := make(utils.Digraph)
 	for dom := range nameToDominators {
-		out[dom] = []string{}
 		for sub := range nameToDominators {
 			if isIDom(dom, sub, cfg, nameToDominators) {
 				out[dom] = append(out[dom], sub)
