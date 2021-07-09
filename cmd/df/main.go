@@ -49,7 +49,7 @@ func defined(prog models.Program) (namesInOrder []string, nameToProgramPoint map
 	})
 
 	workList := []string{namesInOrder[0]}
-	df.DF(nameToProgramPoint, cfg, defed, workList, df.Forward)
+	df.DF(nameToProgramPoint, cfg, workList, df.Forward, defed)
 
 	return namesInOrder, nameToProgramPoint
 }
@@ -64,7 +64,7 @@ func live(prog models.Program) (namesInOrder []string, nameToProgramPoint map[st
 	})
 
 	workList := []string{namesInOrder[len(namesInOrder)-1]}
-	df.DF(nameToProgramPoint, cfg, used, workList, df.Reverse)
+	df.DF(nameToProgramPoint, cfg, workList, df.Reverse, used)
 
 	return namesInOrder, nameToProgramPoint
 }

@@ -21,9 +21,9 @@ type ProgramPoint struct {
 
 func DF(nameToProgramPoint map[string]*ProgramPoint,
 	cfg utils.Digraph,
-	transfer func(name string, instructions []models.Instruction, in lattice.Lattice) lattice.Lattice,
 	initialWorkList []string,
-	direction Direction) {
+	direction Direction,
+	transfer func(name string, instructions []models.Instruction, in lattice.Lattice) lattice.Lattice) {
 
 	workList := initialWorkList
 	for len(workList) != 0 {
