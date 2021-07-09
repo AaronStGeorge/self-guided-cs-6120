@@ -1,0 +1,8 @@
+entry1:
+  entry1
+while.cond:
+  entry1, while.cond
+while.body:
+  entry1, while.body, while.cond
+while.finish:
+  entry1, while.cond, while.finish

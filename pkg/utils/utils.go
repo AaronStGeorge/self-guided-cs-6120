@@ -27,22 +27,20 @@ func BasicBlocks(body []models.Instruction) (namesInOrder []string, nameToBlock 
 	var blockName *string
 
 	addBlock := func() {
-		if len(block) != 0 {
-			// If there was no blockName from a label for the block give it one
-			if blockName == nil {
-				tmp := fmt.Sprintf("b%d", blockCounter)
-				blockName = &tmp
-				blockCounter++
-			}
-
-			// Add to output
-			nameToBlock[*blockName] = block
-			namesInOrder = append(namesInOrder, *blockName)
-
-			// Reset state
-			block = []models.Instruction{}
-			blockName = nil
+		// If there was no blockName from a label for the block give it one
+		if blockName == nil {
+			tmp := fmt.Sprintf("b%d", blockCounter)
+			blockName = &tmp
+			blockCounter++
 		}
+
+		// Add to output
+		nameToBlock[*blockName] = block
+		namesInOrder = append(namesInOrder, *blockName)
+
+		// Reset state
+		block = []models.Instruction{}
+		blockName = nil
 	}
 
 	for _, instruction := range body {
@@ -52,7 +50,21 @@ func BasicBlocks(body []models.Instruction) (namesInOrder []string, nameToBlock 
 				addBlock()
 			}
 		} else { // we have a label
-			addBlock()
+
+			// If the first thing in the program is a label create a
+			// block. Jumping to the label is not the same as
+			// jumping to the entry point of the function this block
+			// serves to disambiguate those... Maybe, this doesn't
+			// really make intuitive sense to me, it's just what I
+			// found in the existing tests. That explanation sort of
+			// makes sense though.
+			if len(block) != 0 {
+				addBlock()
+			} else if len(namesInOrder) == 0 {
+				temp := "entry1"
+				blockName = &temp
+				addBlock()
+			}
 			// The next block will start with label we just found
 			blockName = instruction.Label
 			block = append(block, instruction)
@@ -81,20 +93,28 @@ func MakeCFG(namesInOrder []string, nameToBlock map[string][]models.Instruction)
 		block := nameToBlock[name]
 		var jumpedTo []string
 
-		// If the last instruction is a jmp or a br then the jumped to
-		// blocks are whatever the labels are for that instruction.
-		lastInst := block[len(block)-1]
-		switch *lastInst.Op {
-		case "jmp", "br":
-			jumpedTo = lastInst.Labels
-		case "ret":
-			// Return instructions don't have following instructions.
-		default:
-			// If we're not at the last block and it's not a jmp instruction
-			// then the next block in the control flow graph is just the
-			// proceeding block.
+		proceedingBlock := func() {
 			if i != len(namesInOrder)-1 {
 				jumpedTo = append(jumpedTo, namesInOrder[i+1])
+			}
+		}
+
+		if len(block) == 0 {
+			proceedingBlock()
+		} else {
+			// If the last instruction is a jmp or a br then the jumped to
+			// blocks are whatever the labels are for that instruction.
+			lastInst := block[len(block)-1]
+			switch *lastInst.Op {
+			case "jmp", "br":
+				jumpedTo = lastInst.Labels
+			case "ret":
+				// Return instructions don't have following instructions.
+			default:
+				// If we're not at the last block and it's not a jmp instruction
+				// then the next block in the control flow graph is just the
+				// proceeding block.
+				proceedingBlock()
 			}
 		}
 
