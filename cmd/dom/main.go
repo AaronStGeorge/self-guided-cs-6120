@@ -72,8 +72,8 @@ func walkUp(cfg utils.Digraph, start string, walk func(name string) bool) {
 	BFS(cfg, start, Up, walk)
 }
 
-// immediateDom - immediate dominator
-func immediateDom(start string, cfg utils.Digraph, dominators utils.Set) (string, bool) {
+// immediateDominatorFromDoms - immediate dominator calculated from the dominators set
+func immediateDominatorFromDoms(start string, cfg utils.Digraph, dominators utils.Set) (string, bool) {
 	s := make(utils.Set)
 	s.Add(start)
 	dominators = utils.Sub(dominators, s)
@@ -97,7 +97,7 @@ func isIDom(dom, sub string, cfg utils.Digraph, nameToDominators map[string]util
 	if !nameToDominators[sub].Contains(dom) {
 		return false
 	}
-	idom, ok := immediateDom(sub, cfg, nameToDominators[sub])
+	idom, ok := immediateDominatorFromDoms(sub, cfg, nameToDominators[sub])
 	return ok && idom == dom
 }
 
@@ -113,10 +113,62 @@ func tree(cfg utils.Digraph, nameToDominators map[string]utils.Set) utils.Digrap
 	return out
 }
 
-func outputDominators(namesInOrder []string, nameToDominators map[string]utils.Set) {
+// immediateDominatorFromTree - immediate dominators from the dominator tree
+func immediateDominatorFromTree(name string, domTree utils.Digraph) (string, bool) {
+	preds := utils.Predecessors(domTree, name)
+	if len(preds) > 1 {
+		panic("assertion error: dom tree malformed")
+	}
+	if len(preds) == 1 {
+		return preds[0], true
+	}
+	return "", false
+}
+
+func front(namesInOrder []string, cfg utils.Digraph, domTree utils.Digraph) map[string]utils.Set {
+	immediateDominator := func(node string) string {
+		if imDdom, ok := immediateDominatorFromTree(node, domTree); ok {
+			return imDdom
+		}
+		// The only thing that won't have an immediate dominator will be
+		// the entry point. While running up the dominators from a
+		// predecessor of a join point we should not need to ask what
+		// the immediate dominator of the entry point is because that
+		// will always be a strict dominator of any join point, so our
+		// while loop will short circut.
+		panic("assertion error: no immediate dominator")
+	}
+
+	// initialization
+	nameToFront := make(map[string]utils.Set)
+	for _, name := range namesInOrder {
+		nameToFront[name] = utils.NewSet()
+	}
+
+	// Compute dominance frontier
+	// Engineering a Compiler pp. 499
+	for _, name := range namesInOrder {
+		preds := utils.Predecessors(cfg, name)
+		if len(preds) >= 2 {
+			joinPoint := name
+			for _, pred := range preds {
+				runner := pred
+				if idom, ok := immediateDominatorFromTree(joinPoint, domTree); ok {
+					for runner != idom {
+						nameToFront[runner] = utils.Union(nameToFront[runner], utils.NewSet(joinPoint))
+						runner = immediateDominator(runner)
+					}
+				}
+			}
+		}
+	}
+	return nameToFront
+}
+
+func outputNameToSet(namesInOrder []string, nameToSet map[string]utils.Set) {
 	for _, name := range namesInOrder {
 		fmt.Printf("%s:\n", name)
-		fmt.Printf("  %s\n", nameToDominators[name])
+		fmt.Printf("  %s\n", nameToSet[name])
 	}
 }
 
@@ -137,10 +189,15 @@ func main() {
 	switch args[0] {
 	case "dom":
 		nameToDominators := dominators(namesInOrder, nameToBlock, cfg)
-		outputDominators(namesInOrder, nameToDominators)
+		outputNameToSet(namesInOrder, nameToDominators)
 	case "tree":
 		nameToDominators := dominators(namesInOrder, nameToBlock, cfg)
 		utils.OutputDot(namesInOrder, tree(cfg, nameToDominators))
+	case "front":
+		nameToDominators := dominators(namesInOrder, nameToBlock, cfg)
+		domTree := tree(cfg, nameToDominators)
+		front := front(namesInOrder, cfg, domTree)
+		outputNameToSet(namesInOrder, front)
 	default:
 		println("unknown command")
 		os.Exit(1)

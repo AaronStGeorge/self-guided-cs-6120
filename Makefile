@@ -2,8 +2,7 @@ TESTS := test/in-out/*.bril \
          test/tdce/*.bril \
          test/lvn/*.bril \
          test/df/*.bril \
-         test/dom/*-dom.bril \
-         test/dom/*-tree.bril
+         test/dom/*.bril
 
 .PHONY: test
 test: build

@@ -208,6 +208,12 @@ func (s Set) Remove(item string) {
 	delete(s, item)
 }
 
+func NewSet(items ...string) Set {
+	out := make(Set)
+	out.Add(items...)
+	return out
+}
+
 func Sub(rhs, lhs Set) Set {
 	out := make(Set)
 	for item := range rhs {

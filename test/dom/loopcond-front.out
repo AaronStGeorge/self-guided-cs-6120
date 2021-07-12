@@ -1,0 +1,12 @@
+entry:
+  ∅
+loop:
+  loop
+body:
+  loop
+then:
+  endif
+endif:
+  loop
+exit:
+  ∅
