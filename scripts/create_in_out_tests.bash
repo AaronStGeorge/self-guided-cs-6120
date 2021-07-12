@@ -14,9 +14,9 @@ cd $TARGET_DIR
 
 COUNTER=0
 echo "Copying bril files from $BRIL_TEST_DIR to $TARGET_DIR"
-for FILE in $(find "$BRIL_TEST_DIR" -type f -name "*.bril" ! -name "spec*" ! -name "ssa*"); do
+for FILE in $(find "$BRIL_TEST_DIR" -type f -name "*.bril" ! -name "spec*"); do
   # Copy only if they don't have any errors when run through bril2json
-  if bril2json < "$FILE" > /dev/null 2> /dev/null; then
+  if bril2json < "$FILE" > /dev/null 2> /dev/null && ! grep -q "CMD" "$FILE"; then
     cp "$FILE" .
     (( COUNTER++ )) || true
     echo "$COUNTER - copied $FILE"

@@ -20,7 +20,7 @@ func main() {
 
 	//// the [0] is definitely not a reasonable thing to do in a production circumstance
 	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0])
-	cfg := utils.MakeCFG(namesInOrder, nameToBlock)
+	cfg := utils.CFG(namesInOrder, nameToBlock)
 
 	switch args[0] {
 	case "dom":

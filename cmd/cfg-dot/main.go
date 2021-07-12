@@ -8,7 +8,7 @@ func main() {
 	prog := utils.ReadProgram()
 
 	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0])
-	cfg := utils.MakeCFG(namesInOrder, nameToBlock)
+	cfg := utils.CFG(namesInOrder, nameToBlock)
 
 	utils.OutputDot(namesInOrder, cfg)
 }

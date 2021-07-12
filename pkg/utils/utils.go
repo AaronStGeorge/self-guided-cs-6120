@@ -85,8 +85,8 @@ func contains(strs []string, str string) bool {
 	return false
 }
 
-// MakeCFG computes the control flow graph
-func MakeCFG(namesInOrder []string, nameToBlock map[string][]models.Instruction) Digraph {
+// CFG computes the control flow graph
+func CFG(namesInOrder []string, nameToBlock map[string][]models.Instruction) Digraph {
 	nameToJumpedTo := make(map[string][]string)
 	for i, name := range namesInOrder {
 		block := nameToBlock[name]
