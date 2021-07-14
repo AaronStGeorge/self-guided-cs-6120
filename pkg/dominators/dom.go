@@ -48,10 +48,10 @@ func Front(namesInOrder []string, cfg utils.Digraph, domTree utils.Digraph) map[
 	return nameToFront
 }
 
-func Tree(cfg utils.Digraph, nameToDominators map[string]utils.Set) utils.Digraph {
+func Tree(namesInOrder []string, cfg utils.Digraph, nameToDominators map[string]utils.Set) utils.Digraph {
 	out := make(utils.Digraph)
-	for dom := range nameToDominators {
-		for sub := range nameToDominators {
+	for _, dom := range namesInOrder {
+		for _, sub := range namesInOrder {
 			if isIDom(dom, sub, cfg, nameToDominators) {
 				out[dom] = append(out[dom], sub)
 			}

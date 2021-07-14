@@ -48,7 +48,6 @@ func BasicBlocks(function models.Function) (namesInOrder []string, nameToBlock m
 				addBlock()
 			}
 		} else { // we have a label
-
 			if len(block) != 0 {
 				addBlock()
 			} else if len(namesInOrder) == 0 && len(function.Args) != 0 {

@@ -28,10 +28,10 @@ func main() {
 		utils.OutputBlockNameToSet(namesInOrder, nameToDominators)
 	case "tree":
 		nameToDominators := dominators.Dominators(namesInOrder, nameToBlock, cfg)
-		utils.OutputDot(namesInOrder, dominators.Tree(cfg, nameToDominators))
+		utils.OutputDot(namesInOrder, dominators.Tree(namesInOrder, cfg, nameToDominators))
 	case "front":
 		nameToDominators := dominators.Dominators(namesInOrder, nameToBlock, cfg)
-		domTree := dominators.Tree(cfg, nameToDominators)
+		domTree := dominators.Tree(namesInOrder, cfg, nameToDominators)
 		front := dominators.Front(namesInOrder, cfg, domTree)
 		utils.OutputBlockNameToSet(namesInOrder, front)
 	default:
