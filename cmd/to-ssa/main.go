@@ -1,3 +1,4 @@
+// Assumes that input program doesn't have phi nodes
 package main
 
 import (
@@ -8,19 +9,10 @@ import (
 	"oooga.ooo/cs-1620/pkg/utils"
 )
 
-func contains(strs []string, str string) bool {
-	for _, s := range strs {
-		if s == str {
-			return true
-		}
-	}
-	return false
-}
-
 func existingPhi(block []models.Instruction, v string) bool {
 	for _, inst := range block {
 		if inst.Op != nil && *inst.Op == "phi" {
-			if contains(inst.Args, v) {
+			if *inst.Dest == v {
 				return true
 			}
 		}
@@ -194,8 +186,11 @@ func firstIndex(strings []string, s string) int {
 	return -1
 }
 
-func renameVars(name string, nameToBlock map[string][]models.Instruction, cfg utils.Digraph, tree utils.Digraph) {
+func renameVars(name string, function models.Function, nameToBlock map[string][]models.Instruction, cfg utils.Digraph, tree utils.Digraph) {
 	vars := make(map[string]*stack)
+	for _, arg := range function.Args {
+		vars[arg.Name] = newStack(arg.Name)
+	}
 	count := make(map[string]int)
 	rename(name, nameToBlock, cfg, tree, vars, count)
 }
@@ -234,13 +229,13 @@ func main() {
 	nameToDoms := dominators.Dominators(namesInOrder, nameToBlock, cfg)
 	tree := dominators.Tree(namesInOrder, cfg, nameToDoms)
 	nameToDF := dominators.Front(namesInOrder, cfg, tree)
+	namesInOrder, nameToBlock = utils.LabelNonEmptyBlocks(namesInOrder, nameToBlock)
 
 	addPhiNodes(nameToBlock, cfg, nameToDF)
 	entry := namesInOrder[0]
-	renameVars(entry, nameToBlock, cfg, tree)
+	renameVars(entry, prog.Functions[0], nameToBlock, cfg, tree)
 
 	namesInOrder, nameToBlock = utils.AddRet(namesInOrder, nameToBlock)
-	namesInOrder, nameToBlock = utils.LabelNonEmptyBlocks(namesInOrder, nameToBlock)
 	instructions := utils.FlattenBlocks(namesInOrder, nameToBlock)
 	prog.Functions[0].Instrs = instructions
 	utils.PrintProgram(prog)

@@ -71,7 +71,9 @@ func BasicBlocks(function models.Function) (namesInOrder []string, nameToBlock m
 		}
 	}
 
-	addBlock()
+	if len(block) != 0 {
+		addBlock()
+	}
 	return namesInOrder, nameToBlock
 }
 
@@ -168,25 +170,29 @@ func AddRet(namesInOrder []string, nameToBlock map[string][]models.Instruction) 
 	ret := "ret"
 	inst := models.Instruction{Op: &ret}
 	last := namesInOrder[len(namesInOrder)-1]
-	out[last] = append(out[last], inst)
+	lastInst := out[last][len(out[last])-1]
+	if lastInst.Op != nil && *lastInst.Op != ret {
+		out[last] = append(out[last], inst)
+	}
 	return namesInOrder, out
 }
 
 func LabelNonEmptyBlocks(namesInOrder []string, nameToBlock map[string][]models.Instruction) ([]string, map[string][]models.Instruction) {
-	//out := make(map[string][]models.Instruction)
-	//for _, name := range namesInOrder {
-	//	block := nameToBlock[name]
-	//	if len(block) > 0 {
-	//		if block[0].Label == nil {
-	//			inst := models.Instruction{
-	//				Label: &name,
-	//			}
-	//			block = append([]models.Instruction{inst}, block...)
-	//		}
-	//	}
-	//	out[name] = block
-	//}
-	return namesInOrder, nameToBlock
+	out := make(map[string][]models.Instruction)
+	for _, name := range namesInOrder {
+		block := nameToBlock[name]
+		if len(block) > 0 {
+			if block[0].Label == nil {
+				n := name
+				inst := models.Instruction{
+					Label: &n,
+				}
+				block = append([]models.Instruction{inst}, block...)
+			}
+		}
+		out[name] = block
+	}
+	return namesInOrder, out
 }
 
 func OutputBlockNameToSet(namesInOrder []string, nameToSet map[string]Set) {
