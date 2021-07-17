@@ -35,11 +35,6 @@ func addPhi(block []models.Instruction, cfg utils.Digraph, v string, t models.Ty
 		Type:   &t,
 	}
 
-	// TODO: I'm just assuming that a block has a label. They seem to be
-	// added places tests, and I think it makes sense that it would be nice
-	// if that was just always true. Code to uphold that invariant should be
-	// added.
-
 	// Doing an insertion sort here to ensure that phi nodes always have the
 	// same order in the block irregardless of the order in which they are
 	// added. Ranging over the dominance frontier which is a map and
