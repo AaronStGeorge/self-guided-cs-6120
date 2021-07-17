@@ -160,6 +160,35 @@ func FlattenBlocks(namesInOrder []string, nameToBlock map[string][]models.Instru
 	return out
 }
 
+func AddRet(namesInOrder []string, nameToBlock map[string][]models.Instruction) ([]string, map[string][]models.Instruction) {
+	out := make(map[string][]models.Instruction)
+	for _, name := range namesInOrder {
+		out[name] = nameToBlock[name]
+	}
+	ret := "ret"
+	inst := models.Instruction{Op: &ret}
+	last := namesInOrder[len(namesInOrder)-1]
+	out[last] = append(out[last], inst)
+	return namesInOrder, out
+}
+
+func LabelNonEmptyBlocks(namesInOrder []string, nameToBlock map[string][]models.Instruction) ([]string, map[string][]models.Instruction) {
+	//out := make(map[string][]models.Instruction)
+	//for _, name := range namesInOrder {
+	//	block := nameToBlock[name]
+	//	if len(block) > 0 {
+	//		if block[0].Label == nil {
+	//			inst := models.Instruction{
+	//				Label: &name,
+	//			}
+	//			block = append([]models.Instruction{inst}, block...)
+	//		}
+	//	}
+	//	out[name] = block
+	//}
+	return namesInOrder, nameToBlock
+}
+
 func OutputBlockNameToSet(namesInOrder []string, nameToSet map[string]Set) {
 	for _, name := range namesInOrder {
 		fmt.Printf("%s:\n", name)

@@ -14,6 +14,7 @@ func Predecessors(cfg Digraph, name string) []string {
 			predecessors = append(predecessors, n)
 		}
 	}
+	sort.Strings(predecessors)
 	return predecessors
 }
 
