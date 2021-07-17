@@ -1,4 +1,6 @@
 @main(cond: bool) {
+.entry1:
+  jmp .entry;
 .entry:
   a.0: int = const 47;
   br cond .left .right;

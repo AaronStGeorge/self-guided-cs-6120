@@ -62,7 +62,12 @@ func BasicBlocks(function models.Function) (namesInOrder []string, nameToBlock m
 				// tests. That explanation sort of makes sense
 				// though.
 				temp := "entry1"
+				jmp := "jmp"
 				blockName = &temp
+				block = []models.Instruction{{
+					Op:     &jmp,
+					Labels: []string{*instruction.Label},
+				}}
 				addBlock()
 			}
 			// The next block will start with label we just found
