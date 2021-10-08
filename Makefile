@@ -9,7 +9,7 @@ TESTS := test/in-out/*.bril \
 test: build
 	@turnt $(TESTS)
 
-.PHONY: test
+.PHONY: build
 build:
 	@mkdir -p bin
 	@rm -f bin/*;
