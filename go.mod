@@ -1,3 +1,3 @@
-module oooga.ooo/cs-1620
+module aaronstgeorge.com/self-guided-cs-1620
 
 go 1.16
