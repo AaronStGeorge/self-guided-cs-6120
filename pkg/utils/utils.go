@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"oooga.ooo/cs-1620/pkg/models"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/models"
 )
 
 var terminators = [...]string{"jmp", "br", "ret"}

@@ -1,9 +1,9 @@
 package df
 
 import (
-	"oooga.ooo/cs-1620/pkg/lattice"
-	"oooga.ooo/cs-1620/pkg/models"
-	"oooga.ooo/cs-1620/pkg/utils"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/lattice"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/models"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/utils"
 )
 
 type Direction int

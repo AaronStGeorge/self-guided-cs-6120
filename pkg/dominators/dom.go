@@ -1,11 +1,11 @@
 package dominators
 
 import (
-	"oooga.ooo/cs-1620/pkg/df"
-	dfutils "oooga.ooo/cs-1620/pkg/df/utils"
-	"oooga.ooo/cs-1620/pkg/lattice"
-	"oooga.ooo/cs-1620/pkg/models"
-	"oooga.ooo/cs-1620/pkg/utils"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/df"
+	dfutils "aaronstgeorge.com/self-guided-cs-1620/pkg/df/utils"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/lattice"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/models"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/utils"
 )
 
 func Front(namesInOrder []string, cfg utils.Digraph, domTree utils.Digraph) map[string]utils.Set {

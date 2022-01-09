@@ -3,8 +3,8 @@
 package main
 
 import (
-	"oooga.ooo/cs-1620/pkg/models"
-	"oooga.ooo/cs-1620/pkg/utils"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/models"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/utils"
 )
 
 // dklPass - a single drop killed local pass

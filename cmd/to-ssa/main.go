@@ -4,9 +4,9 @@ package main
 import (
 	"fmt"
 
-	"oooga.ooo/cs-1620/pkg/dominators"
-	"oooga.ooo/cs-1620/pkg/models"
-	"oooga.ooo/cs-1620/pkg/utils"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/dominators"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/models"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/utils"
 )
 
 func existingPhi(block []models.Instruction, v string) bool {

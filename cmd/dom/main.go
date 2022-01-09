@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	"oooga.ooo/cs-1620/pkg/dominators"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/dominators"
 
-	"oooga.ooo/cs-1620/pkg/utils"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/utils"
 )
 
 func main() {

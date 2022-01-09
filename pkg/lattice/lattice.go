@@ -3,7 +3,7 @@ package lattice
 import (
 	"fmt"
 
-	"oooga.ooo/cs-1620/pkg/utils"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/utils"
 )
 
 type Lattice interface {

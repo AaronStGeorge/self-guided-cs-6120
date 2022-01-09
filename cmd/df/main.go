@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"oooga.ooo/cs-1620/pkg/df"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/df"
 
-	"oooga.ooo/cs-1620/pkg/lattice"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/lattice"
 
-	dfutils "oooga.ooo/cs-1620/pkg/df/utils"
-	"oooga.ooo/cs-1620/pkg/models"
-	"oooga.ooo/cs-1620/pkg/utils"
+	dfutils "aaronstgeorge.com/self-guided-cs-1620/pkg/df/utils"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/models"
+	"aaronstgeorge.com/self-guided-cs-1620/pkg/utils"
 )
 
 func defed(_ string, instructions []models.Instruction, in lattice.Lattice) lattice.Lattice {
