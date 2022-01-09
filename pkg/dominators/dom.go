@@ -61,7 +61,7 @@ func Tree(namesInOrder []string, cfg utils.Digraph, nameToDominators map[string]
 }
 
 func Dominators(namesInOrder []string, nameToBlock map[string][]models.Instruction, cfg utils.Digraph) (nameToDominators map[string]utils.Set) {
-	nameToProgramPoint := dfutils.MakeNameToProgramPoint(nameToBlock, func() lattice.Lattice {
+	nameToProgramPoint := dfutils.MakeNameToProgramPoint(nameToBlock, func() lattice.IntersetMeetSetLattice {
 		set := make(utils.Set)
 		set.Add(namesInOrder...)
 		return lattice.IntersetMeetSetLattice{Set: set}
@@ -74,15 +74,15 @@ func Dominators(namesInOrder []string, nameToBlock map[string][]models.Instructi
 		cfg,
 		workList,
 		df.Forward,
-		func(name string, _ []models.Instruction, in lattice.Lattice) lattice.Lattice {
+		func(name string, _ []models.Instruction, in lattice.IntersetMeetSetLattice) lattice.IntersetMeetSetLattice {
 			this := make(utils.Set)
 			this.Add(name)
-			return lattice.IntersetMeetSetLattice{Set: utils.Union(in.(lattice.IntersetMeetSetLattice).Set, this)}
+			return lattice.IntersetMeetSetLattice{Set: utils.Union(in.Set, this)}
 		})
 
 	nameToDominators = make(map[string]utils.Set)
 	for name, pp := range nameToProgramPoint {
-		nameToDominators[name] = pp.Out.(lattice.IntersetMeetSetLattice).Set
+		nameToDominators[name] = pp.Out.Set
 	}
 
 	return nameToDominators

@@ -6,11 +6,11 @@ import (
 	"aaronstgeorge.com/self-guided-cs-1620/pkg/models"
 )
 
-func MakeNameToProgramPoint(nameToBlock map[string][]models.Instruction, top func() lattice.Lattice) map[string]*df.ProgramPoint {
-	nameToProgramPoint := make(map[string]*df.ProgramPoint)
+func MakeNameToProgramPoint[T lattice.Lattice[T]](nameToBlock map[string][]models.Instruction, top func() T) map[string]*df.ProgramPoint[T] {
+	nameToProgramPoint := make(map[string]*df.ProgramPoint[T])
 
 	for name, block := range nameToBlock {
-		nameToProgramPoint[name] = &df.ProgramPoint{
+		nameToProgramPoint[name] = &df.ProgramPoint[T]{
 			Instructions: block,
 			In:           top(),
 			Out:          top(),

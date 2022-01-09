@@ -6,29 +6,28 @@ import (
 	"aaronstgeorge.com/self-guided-cs-1620/pkg/utils"
 )
 
-type Lattice interface {
+type Lattice[T any] interface {
 	// Stringer is used for change comparison in the transfer functions
 	fmt.Stringer
-	// Oh how I pine for generics
-	Meet(l Lattice) Lattice
+	Meet(l T) T
 }
 
-var _ Lattice = UnionMeetSetLattice{}
+var _ Lattice[UnionMeetSetLattice] = UnionMeetSetLattice{}
 
 type UnionMeetSetLattice struct {
 	utils.Set
 }
 
-func (s UnionMeetSetLattice) Meet(l Lattice) Lattice {
-	return UnionMeetSetLattice{utils.Union(s.Set, l.(UnionMeetSetLattice).Set)}
+func (s UnionMeetSetLattice) Meet(l UnionMeetSetLattice) UnionMeetSetLattice {
+	return UnionMeetSetLattice{utils.Union(s.Set, l.Set)}
 }
 
-var _ Lattice = IntersetMeetSetLattice{}
+var _ Lattice[IntersetMeetSetLattice] = IntersetMeetSetLattice{}
 
 type IntersetMeetSetLattice struct {
 	utils.Set
 }
 
-func (s IntersetMeetSetLattice) Meet(l Lattice) Lattice {
-	return IntersetMeetSetLattice{utils.Intersect(s.Set, l.(IntersetMeetSetLattice).Set)}
+func (s IntersetMeetSetLattice) Meet(l IntersetMeetSetLattice) IntersetMeetSetLattice {
+	return IntersetMeetSetLattice{utils.Intersect(s.Set, l.Set)}
 }

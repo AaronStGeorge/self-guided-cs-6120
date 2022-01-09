@@ -13,17 +13,17 @@ import (
 	"aaronstgeorge.com/self-guided-cs-1620/pkg/utils"
 )
 
-func defed(_ string, instructions []models.Instruction, in lattice.Lattice) lattice.Lattice {
+func defed(_ string, instructions []models.Instruction, in lattice.UnionMeetSetLattice) lattice.UnionMeetSetLattice {
 	out := make(utils.Set)
 	for _, inst := range instructions {
 		if inst.Dest != nil {
 			out.Add(*inst.Dest)
 		}
 	}
-	return lattice.UnionMeetSetLattice{utils.Union(in.(lattice.UnionMeetSetLattice).Set, out)}
+	return lattice.UnionMeetSetLattice{Set: utils.Union(in.Set, out)}
 }
 
-func used(_ string, instructions []models.Instruction, in lattice.Lattice) lattice.Lattice {
+func used(_ string, instructions []models.Instruction, in lattice.UnionMeetSetLattice) lattice.UnionMeetSetLattice {
 	used := make(utils.Set)
 	defined := make(utils.Set)
 	for _, inst := range instructions {
@@ -36,15 +36,15 @@ func used(_ string, instructions []models.Instruction, in lattice.Lattice) latti
 			defined.Add(*inst.Dest)
 		}
 	}
-	return lattice.UnionMeetSetLattice{utils.Union(utils.Sub(in.(lattice.UnionMeetSetLattice).Set, defined), used)}
+	return lattice.UnionMeetSetLattice{Set: utils.Union(utils.Sub(in.Set, defined), used)}
 }
 
-func defined(prog models.Program) (namesInOrder []string, nameToProgramPoint map[string]*df.ProgramPoint) {
+func defined(prog models.Program) (namesInOrder []string, nameToProgramPoint map[string]*df.ProgramPoint[lattice.UnionMeetSetLattice]) {
 	// the [0] is definitely not a reasonable thing to do in a production circumstance
 	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0])
 	cfg := utils.CFG(namesInOrder, nameToBlock)
 
-	nameToProgramPoint = dfutils.MakeNameToProgramPoint(nameToBlock, func() lattice.Lattice {
+	nameToProgramPoint = dfutils.MakeNameToProgramPoint(nameToBlock, func() lattice.UnionMeetSetLattice {
 		return lattice.UnionMeetSetLattice{Set: make(utils.Set)}
 	})
 
@@ -54,12 +54,12 @@ func defined(prog models.Program) (namesInOrder []string, nameToProgramPoint map
 	return namesInOrder, nameToProgramPoint
 }
 
-func live(prog models.Program) (namesInOrder []string, nameToProgramPoint map[string]*df.ProgramPoint) {
+func live(prog models.Program) (namesInOrder []string, nameToProgramPoint map[string]*df.ProgramPoint[lattice.UnionMeetSetLattice]) {
 	// the [0] is definitely not a reasonable thing to do in a production circumstance
 	namesInOrder, nameToBlock := utils.BasicBlocks(prog.Functions[0])
 	cfg := utils.CFG(namesInOrder, nameToBlock)
 
-	nameToProgramPoint = dfutils.MakeNameToProgramPoint(nameToBlock, func() lattice.Lattice {
+	nameToProgramPoint = dfutils.MakeNameToProgramPoint(nameToBlock, func() lattice.UnionMeetSetLattice {
 		return lattice.UnionMeetSetLattice{Set: make(utils.Set)}
 	})
 
@@ -69,7 +69,7 @@ func live(prog models.Program) (namesInOrder []string, nameToProgramPoint map[st
 	return namesInOrder, nameToProgramPoint
 }
 
-func output(namesInOrder []string, nameToProgramPoint map[string]*df.ProgramPoint) {
+func output[T lattice.Lattice[T]](namesInOrder []string, nameToProgramPoint map[string]*df.ProgramPoint[T]) {
 	for _, name := range namesInOrder {
 		fmt.Printf("%s:\n", name)
 		fmt.Printf("  in:  %s\n", nameToProgramPoint[name].In)
@@ -88,7 +88,7 @@ func main() {
 	prog := utils.ReadProgram()
 
 	var namesInOrder []string
-	var nameToProgramPoint map[string]*df.ProgramPoint
+	var nameToProgramPoint map[string]*df.ProgramPoint[lattice.UnionMeetSetLattice]
 	switch args[0] {
 	case "defined":
 		namesInOrder, nameToProgramPoint = defined(prog)

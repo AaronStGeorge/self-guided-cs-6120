@@ -13,17 +13,17 @@ const (
 	Reverse
 )
 
-type ProgramPoint struct {
+type ProgramPoint[T lattice.Lattice[T]] struct {
 	Instructions []models.Instruction
-	In           lattice.Lattice
-	Out          lattice.Lattice
+	In           T
+	Out          T
 }
 
-func DF(nameToProgramPoint map[string]*ProgramPoint,
+func DF[T lattice.Lattice[T]](nameToProgramPoint map[string]*ProgramPoint[T],
 	cfg utils.Digraph,
 	initialWorkList []string,
 	direction Direction,
-	transfer func(name string, instructions []models.Instruction, in lattice.Lattice) lattice.Lattice) {
+	transfer func(name string, instructions []models.Instruction, in T) T) {
 
 	workList := initialWorkList
 	for len(workList) != 0 {
